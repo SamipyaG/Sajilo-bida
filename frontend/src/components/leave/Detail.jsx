@@ -89,7 +89,7 @@ const Detail = () => {
 
               <div className="flex space-x-3 mb-2">
                 <p className="text-lg font-bold">Department:</p>
-                <p className="font-medium">{leave.employeeId.department.dep_name}</p>
+                <p className="font-medium">{leave.employeeId.department.department_name}</p>
               </div>
               <div className="flex space-x-3 mb-2">
                 <p className="text-lg font-bold">Start Date:</p>

@@ -22,7 +22,7 @@ const Table = () => {
           employeeId: leave.employeeId.employeeId,
           name: leave.employeeId.userId.name,
           leaveType: leave.leaveType,
-          department: leave.employeeId.department.dep_name,
+          department: leave.employeeId.department.department_name,
           days:
             new Date(leave.endDate).getDate() -
             new Date(leave.startDate).getDate(),

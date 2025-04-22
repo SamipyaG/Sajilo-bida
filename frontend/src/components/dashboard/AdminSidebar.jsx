@@ -2,11 +2,15 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaBuilding,
-  FaCalendarAlt,
+  FaCalendarCheck,
   FaCogs,
-  FaMoneyBillWave,
+  FaMoneyCheckAlt,
   FaTachometerAlt,
   FaUsers,
+  FaUserTie,
+  FaUserCog,
+  FaClipboardList,
+  FaWallet,
 } from "react-icons/fa";
 
 const AdminSidebar = () => {
@@ -66,7 +70,7 @@ const AdminSidebar = () => {
             } flex items-center space-x-4 block py-3 px-4 rounded-lg mt-2 transition-all duration-300`
           }
         >
-          <FaCalendarAlt className="text-xl" />
+          <FaCalendarCheck className="text-xl" />
           <span className="font-medium">Leave</span>
         </NavLink>
 
@@ -78,8 +82,44 @@ const AdminSidebar = () => {
             } flex items-center space-x-4 block py-3 px-4 rounded-lg mt-2 transition-all duration-300`
           }
         >
-          <FaMoneyBillWave className="text-xl" />
-          <span className="font-medium">Salary</span>
+          <FaMoneyCheckAlt className="text-xl" />
+          <span className="font-medium">Salary Pay</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin-dashboard/salary/automatic"
+          className={({ isActive }) =>
+            `${
+              isActive ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-blue-700"
+            } flex items-center space-x-4 block py-3 px-4 rounded-lg mt-2 transition-all duration-300`
+          }
+        >
+          <FaWallet className="text-xl" />
+          <span className="font-medium">Automatic Salary Slip</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin-dashboard/designation"
+          className={({ isActive }) =>
+            `${
+              isActive ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-blue-700"
+            } flex items-center space-x-4 block py-3 px-4 rounded-lg mt-2 transition-all duration-300`
+          }
+        >
+          <FaUserTie className="text-xl" />
+          <span className="font-medium">Designation</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin-dashboard/leaveSetup"
+          className={({ isActive }) =>
+            `${
+              isActive ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-blue-700"
+            } flex items-center space-x-4 block py-3 px-4 rounded-lg mt-2 transition-all duration-300`
+          }
+        >
+          <FaClipboardList className="text-xl" />
+          <span className="font-medium">Leave Setup</span>
         </NavLink>
 
         <NavLink

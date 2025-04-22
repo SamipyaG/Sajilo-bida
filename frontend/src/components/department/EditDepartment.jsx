@@ -4,36 +4,58 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const EditDepartment = () => {
   const { id } = useParams();
-  const [department, setDepartment] = useState([]);
+  const navigate = useNavigate();
+
+  const [department, setDepartment] = useState({
+    department_id: "",
+    department_name: "",
+    department_description: "",
+    paid_leave: 16, // Default value
+  });
+
   const [depLoading, setDepLoading] = useState(false);
-  const navigate = useNavigate()
+  const [existingDepartments, setExistingDepartments] = useState([]);
 
   useEffect(() => {
-    const fetchDepartments = async () => {
+    const fetchDepartment = async () => {
       setDepLoading(true);
       try {
-        const responnse = await axios.get(
-          `http://localhost:5000/api/department/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (responnse.data.success) {
-          setDepartment(responnse.data.department);
+        const response = await axios.get(`http://localhost:5000/api/department/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setDepartment(response.data.department);
         }
       } catch (error) {
-        if (error.response && !error.response.data.success) {
-          alert(error.response.data.error);
-        }
+        console.error("Error fetching department:", error);
+        alert(error.response?.data?.error || "Failed to load department.");
       } finally {
         setDepLoading(false);
       }
     };
 
-    fetchDepartments();
-  }, []);
+    const fetchAllDepartments = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/department`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setExistingDepartments(response.data.departments);
+        }
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      }
+    };
+
+    fetchDepartment();
+    fetchAllDepartments();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,23 +64,30 @@ const EditDepartment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if department_id is unique
+    const isDuplicateId = existingDepartments.some(
+      (dep) => dep.department_id === department.department_id && dep._id !== id
+    );
+
+    if (isDuplicateId) {
+      alert("Department ID must be unique.");
+      return;
+    }
+
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/department/${id}`,
-        department,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.put(`http://localhost:5000/api/department/${id}`, department, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
       if (response.data.success) {
         navigate("/admin-dashboard/departments");
       }
     } catch (error) {
-      if (error.response && !error.response.data.success) {
-        alert(error.response.data.error);
-      }
+      console.error("Error updating department:", error);
+      alert(error.response?.data?.error || "Failed to update department.");
     }
   };
 
@@ -71,17 +100,29 @@ const EditDepartment = () => {
           <h2 className="text-2xl font-bold mb-6">Edit Department</h2>
           <form onSubmit={handleSubmit}>
             <div>
-              <label
-                htmlFor="dep_name"
-                className="text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="department_id" className="text-sm font-medium text-gray-700">
+                Department ID
+              </label>
+              <input
+                type="text"
+                name="department_id"
+                value={department.department_id}
+                onChange={handleChange}
+                placeholder="Department ID"
+                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+
+            <div className="mt-3">
+              <label htmlFor="department_name" className="text-sm font-medium text-gray-700">
                 Department Name
               </label>
               <input
                 type="text"
-                name="dep_name"
+                name="department_name"
+                value={department.department_name}
                 onChange={handleChange}
-                value={department.dep_name}
                 placeholder="Department Name"
                 className="mt-1 w-full p-2 border border-gray-300 rounded-md"
                 required
@@ -89,27 +130,35 @@ const EditDepartment = () => {
             </div>
 
             <div className="mt-3">
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="department_description" className="block text-sm font-medium text-gray-700">
                 Description
               </label>
               <textarea
-                name="description"
-                placeholder="Description"
+                name="department_description"
+                value={department.department_description}
                 onChange={handleChange}
-                value={department.description}
+                placeholder="Department Description"
                 className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
                 rows="4"
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Edit Department
+            <div className="mt-3">
+              <label htmlFor="paid_leave" className="text-sm font-medium text-gray-700">
+                Paid Leave
+              </label>
+              <input
+                type="number"
+                name="paid_leave"
+                value={department.paid_leave}
+                onChange={handleChange}
+                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                min="0"
+              />
+            </div>
+
+            <button type="submit" className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded">
+              Update Department
             </button>
           </form>
         </div>

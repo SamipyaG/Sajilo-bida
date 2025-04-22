@@ -1,85 +1,133 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
-const View = () => {
-  const { id } = useParams();
-  const [employee, setEmployee] = useState(null);
+const EmployeeList = () => {
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchEmployee = async () => {
+    const fetchEmployees = async () => {
       try {
-        const responnse = await axios.get(
-          `http://localhost:5000/api/employee/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (responnse.data.success) {
-          setEmployee(responnse.data.employee);
+        setLoading(true);
+        setError(null);
+
+        const response = await axios.get('http://localhost:5000/api/employee', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        console.log('Full API response:', response);
+
+        const employeeData = response?.data?.data;
+
+        if (!Array.isArray(employeeData)) {
+          throw new Error('Employee data is not an array');
         }
-      } catch (error) {
-        if (error.response && !error.response.data.success) {
-          alert(error.response.data.error);
-        }
+
+        setEmployees(employeeData);
+      } catch (err) {
+        console.error('Error fetching employees:', err);
+        setError(err.response?.data?.message || err.message || 'Failed to load employees');
+        setEmployees([]); // Ensure it's always an array
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchEmployee();
+    fetchEmployees();
   }, []);
+
+  if (loading) {
+    return <div className="text-center p-4">Loading employees...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-4 text-red-500">
+        <h3 className="font-bold">Error Loading Employees</h3>
+        <p>{error}</p>
+        <p className="text-sm mt-2">Check browser console for more details</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      {employee ? (
-        <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-md shadow-md">
-          <h2 className="text-2xl font-bold mb-8 text-center">
-            Employee Details
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <img
-                src={`http://localhost:5000/${employee.userId.profileImage}`}
-                className="rounded-full border w-72"
-              />
-            </div>
-            <div>
-              <div className="flex space-x-3 mb-5">
-                <p className="text-lg font-bold">Name:</p>
-                <p className="font-medium">{employee.userId.name}</p>
-              </div>
-              <div className="flex space-x-3 mb-5">
-                <p className="text-lg font-bold">Employee ID:</p>
-                <p className="font-medium">{employee.employeeId}</p>
-              </div>
+    <div className="container mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-6">Employee List</h2>
 
-              <div className="flex space-x-3 mb-5">
-                <p className="text-lg font-bold">Date of Birth:</p>
-                <p className="font-medium">
-                  {new Date(employee.dob).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex space-x-3 mb-5">
-                <p className="text-lg font-bold">Gender:</p>
-                <p className="font-medium">{employee.gender}</p>
-              </div>
-
-              <div className="flex space-x-3 mb-5">
-                <p className="text-lg font-bold">Department:</p>
-                <p className="font-medium">{employee.department.dep_name}</p>
-              </div>
-              <div className="flex space-x-3 mb-5">
-                <p className="text-lg font-bold">Marital Status:</p>
-                <p className="font-medium">{employee.maritalStatus}</p>
-              </div>
-            </div>
-          </div>
+      {Array.isArray(employees) && employees.length === 0 ? (
+        <div className="text-center p-4 bg-yellow-50 rounded-lg">
+          No employees found in the system
         </div>
       ) : (
-        <div> Loading ....</div>
+        <div className="overflow-x-auto bg-white rounded-lg shadow">
+          <table className="min-w-full">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-3 text-left">Employee</th>
+                <th className="px-4 py-3 text-left">Department</th>
+                <th className="px-4 py-3 text-left">Email</th>
+                <th className="px-4 py-3 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {Array.isArray(employees) &&
+                employees.map((employee) => {
+                  const empName = employee.employee_name || 'Unknown';
+                  const empId = employee.employee_id || 'N/A';
+                  const department =
+                    employee.department_name ||
+                    employee.department_id?.department_name ||
+                    'N/A';
+                  const email =
+                    employee.user?.email ||
+                    employee.user_id?.email ||
+                    'N/A';
+                  const profileImage =
+                    employee.user?.profileImage ||
+                    employee.user_id?.profileImage ||
+                    'default.png';
+
+                  return (
+                    <tr key={employee._id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center">
+                          <img
+                            className="h-10 w-10 rounded-full mr-3"
+                            src={`http://localhost:5000/public/uploads/${profileImage}`}
+                            alt={empName}
+                            onError={(e) => {
+                              e.target.src = '/default-profile.png';
+                            }}
+                          />
+                          <div>
+                            <div className="font-medium">{empName}</div>
+                            <div className="text-sm text-gray-500">{empId}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">{department}</td>
+                      <td className="px-4 py-3">{email}</td>
+                      <td className="px-4 py-3">
+                        <Link
+                          to={`/employees/${employee._id}`}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
       )}
-    </>
+    </div>
   );
 };
 
-export default View;
+export default EmployeeList;

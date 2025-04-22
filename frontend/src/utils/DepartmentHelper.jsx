@@ -8,7 +8,7 @@ export const columns = [
   },
   {
     name: "Department Name",
-    selector: (row) => row.dep_name,
+    selector: (row) => row.department_name,
     sortable: true
   },
   {

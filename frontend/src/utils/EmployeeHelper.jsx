@@ -21,7 +21,7 @@ export const columns = [
   },
   {
     name: "Department",
-    selector: (row) => row.dep_name,
+    selector: (row) => row.department_name,
     width: "120px",
   },
   {
@@ -33,34 +33,54 @@ export const columns = [
   {
     name: "Action",
     selector: (row) => row.action,
-    center: "true",
+    center: true, // Fix: "center" should not be a string
   },
 ];
 
+// ✅ Fetch Departments (Already Correct)
 export const fetchDepartments = async () => {
-  let departments;
   try {
-    const responnse = await axios.get("http://localhost:5000/api/department", {
+    const response = await axios.get(`http://localhost:5000/api/department`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-    if (responnse.data.success) {
-      departments = responnse.data.departments;
+
+    if (response.data.success) {
+      return response.data.departments;
     }
   } catch (error) {
     if (error.response && !error.response.data.success) {
       alert(error.response.data.error);
     }
   }
-  return departments;
+  return [];
 };
 
-// employees for salary form
-export const getEmployees = async (id) => {
-  let employees;
+// ✅ Fetch Designations (FIXED & ADDED)
+export const fetchDesignations = async () => {
   try {
-    const responnse = await axios.get(
+    const response = await axios.get(`http://localhost:5000/api/designation`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (response.data.success) {
+      return response.data.designations;
+    }
+  } catch (error) {
+    if (error.response && !error.response.data.success) {
+      alert(error.response.data.error);
+    }
+  }
+  return [];
+};
+
+// ✅ Get Employees for Salary Form (Already Correct)
+export const getEmployees = async (id) => {
+  try {
+    const response = await axios.get(
       `http://localhost:5000/api/employee/department/${id}`,
       {
         headers: {
@@ -68,18 +88,19 @@ export const getEmployees = async (id) => {
         },
       }
     );
-    console.log(responnse)
-    if (responnse.data.success) {
-      employees = responnse.data.employees;
+
+    if (response.data.success) {
+      return response.data.employees;
     }
   } catch (error) {
     if (error.response && !error.response.data.success) {
       alert(error.response.data.error);
     }
   }
-  return employees;
+  return [];
 };
 
+// ✅ Employee Buttons (Already Correct)
 export const EmployeeButtons = ({ Id }) => {
   const navigate = useNavigate();
 
@@ -97,11 +118,18 @@ export const EmployeeButtons = ({ Id }) => {
       >
         Edit
       </button>
-      <button className="px-3 py-1 bg-yellow-600 text-white"
+      <button
+        className="px-3 py-1 bg-yellow-600 text-white"
         onClick={() => navigate(`/admin-dashboard/employees/salary/${Id}`)}
-      >Salary</button>
-      <button className="px-3 py-1 bg-red-600 text-white"
-      onClick={() => navigate(`/admin-dashboard/employees/leaves/${Id}`)}>Leave</button>
+      >
+        Salary
+      </button>
+      <button
+        className="px-3 py-1 bg-red-600 text-white"
+        onClick={() => navigate(`/admin-dashboard/employees/leaves/${Id}`)}
+      >
+        Leave
+      </button>
     </div>
   );
 };

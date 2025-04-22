@@ -13,6 +13,10 @@ import Add from "./components/employee/Add";
 import View from "./components/employee/View";
 import Edit from "./components/employee/Edit";
 import AddSalary from "./components/salary/Add";
+import AutomaticSalary from "./components/salary/automatic";
+import DesignationAdd from "./components/designation/add";
+import DesignationEdit from "./components/designation/edit";
+import DesignationList from "./components/designation/list";
 import ViewSalary from "./components/salary/View";
 import Summary from './components/EmployeeDashboard/Summary'
 import LeaveList from './components/leave/List'
@@ -20,6 +24,9 @@ import AddLeave from './components/leave/Add'
 import Setting from "./components/EmployeeDashboard/Setting";
 import Table from "./components/leave/Table";
 import Detail from "./components/leave/Detail";
+import LeaveSeatupAdd from "./components/leaveSetup/add"
+import LeaveSeatupEdit from "./components/leaveSetup/edit"
+import LeaveSeatupList from "./components/leaveSetup/list"
 
 function App() {
   return (
@@ -71,6 +78,36 @@ function App() {
             path="/admin-dashboard/salary/add"
             element={<AddSalary />}
           ></Route>
+           <Route
+            path="/admin-dashboard/salary/automatic"
+            element={<AutomaticSalary />}
+          ></Route>
+          <Route
+            path="/admin-dashboard/designation/add"
+            element={< DesignationAdd/>}
+          ></Route>
+          <Route
+            path="/admin-dashboard/designation"
+            element={< DesignationList/>}
+          ></Route>
+          <Route
+            path="/admin-dashboard/designation/edit/:id"
+            element={< DesignationEdit/>}
+          ></Route>
+           <Route
+            path="/admin-dashboard/leaveSetup/add"
+            element={< LeaveSeatupAdd/>}
+          ></Route>
+           <Route
+            path="/admin-dashboard/leaveSetup/edit/:id"
+            element={< LeaveSeatupEdit/>}
+          ></Route>
+           <Route
+            path="/admin-dashboard/leaveSetup"
+            element={< LeaveSeatupList/>}
+          ></Route>
+          
+          
           <Route path="/admin-dashboard/leaves" element={<Table />}></Route>
           <Route path="/admin-dashboard/leaves/:id" element={<Detail />}></Route>
           <Route path="/admin-dashboard/employees/leaves/:id" element={<LeaveList />}></Route>

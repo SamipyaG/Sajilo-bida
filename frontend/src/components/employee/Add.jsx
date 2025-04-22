@@ -1,74 +1,122 @@
-import React, { useEffect, useState } from "react";
-import { fetchDepartments } from "../../utils/EmployeeHelper";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { fetchDepartments, fetchDesignations } from '../../utils/EmployeeHelper';
 
-const Add = () => {
+const AddEmployee = () => {
+  const [formData, setFormData] = useState({
+    employee_name: '',
+    email: '',
+    employee_id: '',
+    date_of_birth: '',
+    gender: '',
+    marital_status: '',
+    department_id: '',
+    designation_id: '',
+    password: '',
+    role: 'employee',
+    image: null
+  });
   const [departments, setDepartments] = useState([]);
-  const [formData, setFormData] = useState({});
-  const navigate = useNavigate()
+  const [designations, setDesignations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const getDepartments = async () => {
-      const departments = await fetchDepartments();
-      setDepartments(departments);
+    const loadInitialData = async () => {
+      try {
+        const [deptData, desigData] = await Promise.all([
+          fetchDepartments(),
+          fetchDesignations()
+        ]);
+        setDepartments(deptData);
+        setDesignations(desigData);
+      } catch (err) {
+        console.error("Failed to load initial data:", err);
+        setError("Failed to load department/designation data");
+      }
     };
-    getDepartments();
+    loadInitialData();
   }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "image") {
-      setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
-    } else {
-      setFormData((prevData) => ({ ...prevData, [name]: value }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: files ? files[0] : value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    const formDataObj = new FormData()
-    Object.keys(formData).forEach((key) => {
-        formDataObj.append(key, formData[key])
-    })
+    const formDataObj = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== '') {
+        formDataObj.append(key, value);
+      }
+    });
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/employee/add",
+        'http://localhost:5000/api/employee/add',
         formDataObj,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         }
       );
+
       if (response.data.success) {
-        navigate("/admin-dashboard/employees");
+        alert('Employee added successfully!');
+        navigate('/admin-dashboard/employees');
       }
-    } catch (error) {
-      if (error.response && !error.response.data.success) {
-        alert(error.response.data.error);
-      }
-    }
+    } catch (err) {
+      console.error('Error adding employee:', err);
       
+      if (err.response) {
+        if (err.response.data.details) {
+          setError(err.response.data.details.join('\n'));
+        } else if (err.response.data.error) {
+          setError(err.response.data.error);
+        } else {
+          setError('Failed to add employee');
+        }
+      } else {
+        setError('Network error. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-md shadow-md">
       <h2 className="text-2xl font-bold mb-6">Add New Employee</h2>
+      
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Name */}
+          {/* Employee Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Name
+              Full Name *
             </label>
             <input
               type="text"
-              name="name"
+              name="employee_name"
+              value={formData.employee_name}
               onChange={handleChange}
-              placeholder="Insert Name"
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
               required
             />
@@ -77,13 +125,13 @@ const Add = () => {
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Email
+              Email *
             </label>
             <input
               type="email"
               name="email"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Insert Email"
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
               required
             />
@@ -92,13 +140,13 @@ const Add = () => {
           {/* Employee ID */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Employee ID
+              Employee ID *
             </label>
             <input
               type="text"
-              name="employeeId"
+              name="employee_id"
+              value={formData.employee_id}
               onChange={handleChange}
-              placeholder="Employee ID"
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
               required
             />
@@ -111,11 +159,10 @@ const Add = () => {
             </label>
             <input
               type="date"
-              name="dob"
+              name="date_of_birth"
+              value={formData.date_of_birth}
               onChange={handleChange}
-              placeholder="DOB"
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-              required
             />
           </div>
 
@@ -126,14 +173,14 @@ const Add = () => {
             </label>
             <select
               name="gender"
+              value={formData.gender}
               onChange={handleChange}
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-              required
             >
               <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
@@ -143,110 +190,103 @@ const Add = () => {
               Marital Status
             </label>
             <select
-              name="maritalStatus"
+              name="marital_status"
+              value={formData.marital_status}
               onChange={handleChange}
-              placeholder="Marital Status"
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-              required
             >
               <option value="">Select Status</option>
               <option value="single">Single</option>
               <option value="married">Married</option>
+              <option value="divorced">Divorced</option>
+              <option value="widowed">Widowed</option>
+            </select>
+          </div>
+
+          {/* Department */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Department *
+            </label>
+            <select
+              name="department_id"
+              value={formData.department_id}
+              onChange={handleChange}
+              className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
+              required
+            >
+              <option value="">Select Department</option>
+              {departments.map(dep => (
+                <option key={dep._id} value={dep._id}>
+                  {dep.department_name}
+                </option>
+              ))}
             </select>
           </div>
 
           {/* Designation */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Designation
-            </label>
-            <input
-              type="text"
-              name="designation"
-              onChange={handleChange}
-              placeholder="Designation"
-              className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-              required
-            />
-          </div>
-
-          {/* Department */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Department
+              Designation *
             </label>
             <select
-              name="department"
+              name="designation_id"
+              value={formData.designation_id}
               onChange={handleChange}
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
               required
             >
-              <option value="">Select Department</option>
-              {departments.map((dep) => (
-                <option key={dep._id} value={dep._id}>
-                  {dep.dep_name}
+              <option value="">Select Designation</option>
+              {designations.map(des => (
+                <option key={des._id} value={des._id}>
+                  {des.designation_name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Salary */}
+          {/* Role */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Salary
+              Role *
             </label>
-            <input
-              type="number"
-              name="salary"
+            <select
+              name="role"
+              value={formData.role}
               onChange={handleChange}
-              placeholder="Salary"
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
               required
-            />
+            >
+              <option value="employee">Employee</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Password
+              Password *
             </label>
             <input
               type="password"
               name="password"
-              placeholder="******"
+              value={formData.password}
               onChange={handleChange}
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
               required
+              minLength="6"
             />
-          </div>
-
-          {/* Role */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Role
-            </label>
-            <select
-              name="role"
-              onChange={handleChange}
-              className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-              required
-            >
-              <option value="">Select Role</option>
-              <option value="admin">Admin</option>
-              <option value="employee">Employee</option>
-            </select>
           </div>
 
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Upload Image
+              Profile Image
             </label>
             <input
               type="file"
               name="image"
               onChange={handleChange}
-              placeholder="Upload Image"
               accept="image/*"
               className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
             />
@@ -255,13 +295,16 @@ const Add = () => {
 
         <button
           type="submit"
-          className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded"
+          disabled={loading}
+          className={`w-full mt-6 ${
+            loading ? 'bg-gray-400' : 'bg-teal-600 hover:bg-teal-700'
+          } text-white font-bold py-2 px-4 rounded`}
         >
-          Add Employee
+          {loading ? 'Adding Employee...' : 'Add Employee'}
         </button>
       </form>
     </div>
   );
 };
 
-export default Add;
+export default AddEmployee;

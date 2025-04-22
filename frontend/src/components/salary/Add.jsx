@@ -6,13 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Add = () => {
   const [salary, setSalary] = useState({
     employeeId: null,
-    basicSalary: 0,
-    allowances: 0,
-    deductions: 0,
-    paidLeave: 0,
-    unpaidLeave: 0,
-    tax: 0,
-    payDate: null,
+    departmentId: null,
   });
 
   const [departments, setDepartments] = useState(null);
@@ -28,7 +22,9 @@ const Add = () => {
   }, []);
 
   const handleDepartment = async (e) => {
-    const emps = await getEmployees(e.target.value);
+    const departmentId = e.target.value;
+    setSalary((prevData) => ({ ...prevData, departmentId }));
+    const emps = await getEmployees(departmentId);
     setEmployees(emps);
   };
 
@@ -36,7 +32,7 @@ const Add = () => {
     const { name, value } = e.target;
     setSalary((prevData) => ({
       ...prevData,
-      [name]: name === "employeeId" ? value : Number(value), // Convert to number where applicable
+      [name]: value,
     }));
   };
 
@@ -76,7 +72,7 @@ const Add = () => {
                   Department
                 </label>
                 <select
-                  name="department"
+                  name="departmentId"
                   onChange={handleDepartment}
                   className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
                   required
@@ -84,7 +80,7 @@ const Add = () => {
                   <option value="">Select Department</option>
                   {departments.map((dep) => (
                     <option key={dep._id} value={dep._id}>
-                      {dep.dep_name}
+                      {dep.department_name}
                     </option>
                   ))}
                 </select>
@@ -108,110 +104,6 @@ const Add = () => {
                     </option>
                   ))}
                 </select>
-              </div>
-
-              {/* Basic Salary */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Basic Salary
-                </label>
-                <input
-                  type="number"
-                  name="basicSalary"
-                  onChange={handleChange}
-                  placeholder="Basic Salary"
-                  className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              {/* Allowances */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Allowances
-                </label>
-                <input
-                  type="number"
-                  name="allowances"
-                  onChange={handleChange}
-                  placeholder="Allowances"
-                  className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              {/* Paid Leave */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Paid Leave
-                </label>
-                <input
-                  type="number"
-                  name="paidLeave"
-                  onChange={handleChange}
-                  placeholder="Paid Leave"
-                  className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              {/* Unpaid Leave */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Unpaid Leave
-                </label>
-                <input
-                  type="number"
-                  name="unpaidLeave"
-                  onChange={handleChange}
-                  placeholder="Unpaid Leave"
-                  className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              {/* Tax */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Tax
-                </label>
-                <input
-                  type="number"
-                  name="tax"
-                  onChange={handleChange}
-                  placeholder="Tax"
-                  className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              {/* Deductions */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Deductions
-                </label>
-                <input
-                  type="number"
-                  name="deductions"
-                  onChange={handleChange}
-                  placeholder="Deductions"
-                  className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              {/* Pay Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Pay Date
-                </label>
-                <input
-                  type="date"
-                  name="payDate"
-                  onChange={handleChange}
-                  className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
-                  required
-                />
               </div>
             </div>
 
