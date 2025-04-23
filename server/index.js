@@ -8,7 +8,7 @@ import leaveRouter from './routes/leave.js';
 import settingRouter from './routes/setting.js';
 import dashboardRouter from './routes/dashboard.js';
 import designationRouter from './routes/designation.js'; 
-import leaveSetupRouter from './models/LeaveSetup.js';
+import leaveSetupRouter from './routes/leavesetup.js';
 import connectToDatabase from './db/db.js';
 
 connectToDatabase();
@@ -26,7 +26,7 @@ app.use('/api/leave', leaveRouter);
 app.use('/api/setting', settingRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/designation', designationRouter); 
-app.use('/api/leaveSetup',leaveSetupRouter);
+app.use('/api/leave-Setup',leaveSetupRouter);
 app.listen(process.env.PORT, () => {
     console.log(`Server is Running on port ${process.env.PORT}`);
 });

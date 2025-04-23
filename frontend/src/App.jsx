@@ -95,15 +95,15 @@ function App() {
             element={< DesignationEdit/>}
           ></Route>
            <Route
-            path="/admin-dashboard/leaveSetup/add"
+            path="/admin-dashboard/leave-Setup/add"
             element={< LeaveSeatupAdd/>}
           ></Route>
            <Route
-            path="/admin-dashboard/leaveSetup/edit/:id"
+            path="/admin-dashboard/leave-Setup/edit/:id"
             element={< LeaveSeatupEdit/>}
           ></Route>
            <Route
-            path="/admin-dashboard/leaveSetup"
+            path="/admin-dashboard/leave-Setup"
             element={< LeaveSeatupList/>}
           ></Route>
           

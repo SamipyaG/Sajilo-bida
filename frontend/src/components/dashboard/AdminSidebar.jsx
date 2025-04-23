@@ -111,7 +111,7 @@ const AdminSidebar = () => {
         </NavLink>
 
         <NavLink
-          to="/admin-dashboard/leaveSetup"
+          to="/admin-dashboard/leave-Setup"
           className={({ isActive }) =>
             `${
               isActive ? "bg-blue-500 text-white" : "text-gray-300 hover:bg-blue-700"
